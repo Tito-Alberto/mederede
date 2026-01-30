@@ -85,8 +85,8 @@
                                                         <form action="{{ route('users.approve', $user) }}" method="POST" class="d-inline">
                                                             @csrf
                                                             <input type="hidden" name="role" value="publico">
-                                                            <button type="submit" class="btn btn-sm btn-secondary" title="Voltar para PÃºblico"
-                                                                    onclick="return confirm('Tem certeza que deseja voltar este utilizador para PÃºblico?')">
+                                                            <button type="submit" class="btn btn-sm btn-secondary" title="Voltar para Público"
+                                                                    onclick="return confirm('Tem certeza de que deseja voltar este utilizador para público?')">
                                                                 <i class="fas fa-user"></i>
                                                             </button>
                                                         </form>

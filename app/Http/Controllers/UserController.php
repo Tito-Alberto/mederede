@@ -95,7 +95,7 @@ class UserController extends Controller
     public function approve(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|in:profissional_saude',
+            'role' => 'required|in:profissional_saude,publico',
         ]);
 
         if ($user->role === 'admin') {
@@ -103,7 +103,7 @@ class UserController extends Controller
         }
 
         $user->update([
-            'role' => 'profissional_saude',
+            'role' => $request->role,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Perfil do utilizador atualizado com sucesso!');
