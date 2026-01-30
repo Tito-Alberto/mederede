@@ -34,12 +34,6 @@
                 <p style="color: #667eea; font-weight: bold; font-size: 1.1em;">🔐 {{ $roleTitle }}</p>
             </div>
 
-            @if ($user->role !== 'publico')
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn btn-primary" style="flex: 1; margin: 0;">✏️ Editar Perfil</button>
-                    <button class="btn btn-secondary" style="flex: 1; margin: 0;">🔑 Alterar Senha</button>
-                </div>
-            @endif
         </div>
     </div>
 

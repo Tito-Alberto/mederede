@@ -81,6 +81,16 @@
                                                             </button>
                                                         </form>
                                                     @endif
+                                                    @if ($user->role === 'profissional_saude')
+                                                        <form action="{{ route('users.approve', $user) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="role" value="publico">
+                                                            <button type="submit" class="btn btn-sm btn-secondary" title="Voltar para PÃºblico"
+                                                                    onclick="return confirm('Tem certeza que deseja voltar este utilizador para PÃºblico?')">
+                                                                <i class="fas fa-user"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     @if ($user->id !== auth()->id())
                                                         <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline">
                                                             @csrf
