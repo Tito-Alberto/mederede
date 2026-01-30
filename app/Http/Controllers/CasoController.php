@@ -37,7 +37,13 @@ class CasoController extends Controller
             $query->whereDate('data_inicio', '<=', request('data_ate'));
         }
 
-        // Filtro por Localização
+        // Filtro por Província / Município
+        if (request('provincia')) {
+            $query->where('localizacao', 'like', '%' . request('provincia') . '%');
+        }
+        if (request('municipio')) {
+            $query->where('localizacao', 'like', '%' . request('municipio') . '%');
+        }
         if (request('localizacao')) {
             $query->where('localizacao', 'like', '%' . request('localizacao') . '%');
         }
@@ -66,7 +72,9 @@ class CasoController extends Controller
             'doenca_id' => 'required|exists:doencas,id',
             'status' => 'required|in:confirmado,suspeito,descartado',
             'data_inicio' => 'required|date',
-            'localizacao' => 'required|string|max:255',
+            'provincia' => 'required_without:localizacao|string|max:255',
+            'municipio' => 'required_without:localizacao|string|max:255',
+            'localizacao' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'sintomas' => 'nullable|string',
@@ -76,6 +84,18 @@ class CasoController extends Controller
             'bilhete.unique' => 'Bilhete existente.',
         ]);
 
+        $localizacao = trim($validated['localizacao'] ?? '');
+        if ($localizacao === '') {
+            $provincia = trim($validated['provincia'] ?? '');
+            $municipio = trim($validated['municipio'] ?? '');
+            $localizacao = $provincia;
+            if ($municipio !== '') {
+                $localizacao = $localizacao === '' ? $municipio : ($localizacao . ', ' . $municipio);
+            }
+        }
+        $validated['localizacao'] = $localizacao;
+        unset($validated['provincia'], $validated['municipio']);
+
         if (is_null($validated['latitude']) || is_null($validated['longitude'])) {
             $geo = $this->geocodeLocation($validated['localizacao']);
             if ($geo) {
@@ -83,7 +103,7 @@ class CasoController extends Controller
                 $validated['longitude'] = $geo['lng'];
             } else {
                 return back()->withErrors([
-                    'localizacao' => 'Localizacao nao encontrada. Informe uma localizacao mais especifica.',
+                    'provincia' => 'Localizacao nao encontrada. Informe provincia e municipio mais especificos.',
                 ])->withInput();
             }
         }
@@ -135,7 +155,9 @@ class CasoController extends Controller
             'doenca_id' => 'required|exists:doencas,id',
             'status' => 'required|in:confirmado,suspeito,descartado',
             'data_inicio' => 'required|date',
-            'localizacao' => 'required|string|max:255',
+            'provincia' => 'required_without:localizacao|string|max:255',
+            'municipio' => 'required_without:localizacao|string|max:255',
+            'localizacao' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'sintomas' => 'nullable|string',
@@ -145,6 +167,18 @@ class CasoController extends Controller
             'bilhete.unique' => 'Bilhete existente.',
         ]);
 
+        $localizacao = trim($validated['localizacao'] ?? '');
+        if ($localizacao === '') {
+            $provincia = trim($validated['provincia'] ?? '');
+            $municipio = trim($validated['municipio'] ?? '');
+            $localizacao = $provincia;
+            if ($municipio !== '') {
+                $localizacao = $localizacao === '' ? $municipio : ($localizacao . ', ' . $municipio);
+            }
+        }
+        $validated['localizacao'] = $localizacao;
+        unset($validated['provincia'], $validated['municipio']);
+
         if (is_null($validated['latitude']) || is_null($validated['longitude'])) {
             $geo = $this->geocodeLocation($validated['localizacao']);
             if ($geo) {
@@ -152,7 +186,7 @@ class CasoController extends Controller
                 $validated['longitude'] = $geo['lng'];
             } else {
                 return back()->withErrors([
-                    'localizacao' => 'Localizacao nao encontrada. Informe uma localizacao mais especifica.',
+                    'provincia' => 'Localizacao nao encontrada. Informe provincia e municipio mais especificos.',
                 ])->withInput();
             }
         }

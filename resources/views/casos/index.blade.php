@@ -60,11 +60,16 @@
             </div>
         </div>
 
-        <!-- Pesquisa por Localização e Nome -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <!-- Pesquisa por Província, Município e Nome -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
             <div>
-                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em;">📍 Localização</label>
-                <input type="text" name="localizacao" class="form-control" placeholder="Pesquisar localização..." value="{{ request('localizacao') }}">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em;">📍 Província</label>
+                <input type="text" name="provincia" class="form-control" placeholder="Pesquisar província..." value="{{ request('provincia') }}">
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em;">🏙️ Município</label>
+                <input type="text" name="municipio" class="form-control" placeholder="Pesquisar município..." value="{{ request('municipio') }}">
             </div>
 
             @if (!$isPublic)
@@ -82,7 +87,7 @@
     </form>
 
     <!-- Resumo de Filtros Ativos -->
-    @if(request()->anyFilled(['status', 'doenca_id', 'data_de', 'data_ate', 'localizacao', 'paciente']))
+    @if(request()->anyFilled(['status', 'doenca_id', 'data_de', 'data_ate', 'provincia', 'municipio', 'paciente']))
         <div style="padding: 10px 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3; margin-bottom: 15px;">
             <strong>🔎 Filtros Ativos:</strong>
             @if(request('status'))
@@ -97,8 +102,11 @@
             @if(request('data_ate'))
                 <span style="display: inline-block; background: #2196f3; color: white; padding: 3px 8px; border-radius: 4px; margin: 0 5px;">Até: {{ request('data_ate') }}</span>
             @endif
-            @if(request('localizacao'))
-                <span style="display: inline-block; background: #2196f3; color: white; padding: 3px 8px; border-radius: 4px; margin: 0 5px;">Local: {{ request('localizacao') }}</span>
+            @if(request('provincia'))
+                <span style="display: inline-block; background: #2196f3; color: white; padding: 3px 8px; border-radius: 4px; margin: 0 5px;">Província: {{ request('provincia') }}</span>
+            @endif
+            @if(request('municipio'))
+                <span style="display: inline-block; background: #2196f3; color: white; padding: 3px 8px; border-radius: 4px; margin: 0 5px;">Município: {{ request('municipio') }}</span>
             @endif
             @if(!$isPublic && request('paciente'))
                 <span style="display: inline-block; background: #2196f3; color: white; padding: 3px 8px; border-radius: 4px; margin: 0 5px;">Paciente: {{ request('paciente') }}</span>
@@ -111,7 +119,8 @@
             <tr>
                 <th>Paciente</th>
                 <th>Doença</th>
-                <th>Localização</th>
+                <th>Província</th>
+                <th>Município</th>
                 <th>Status</th>
                 <th>Data Início</th>
                 <th>Ações</th>
@@ -127,7 +136,8 @@
                 @endphp
                 <td>{{ $nomeExibido }}</td>
                 <td>{{ $caso->doenca->nome ?? 'N/A' }}</td>
-                <td>{{ $caso->localizacao }}</td>
+                <td>{{ $caso->provincia }}</td>
+                <td>{{ $caso->municipio }}</td>
                 <td>
                     @if($caso->status === 'suspeito')
                         <span class="badge badge-warning">Suspeito</span>

@@ -128,8 +128,10 @@
                 <h3 style="color: #f39c12; margin-bottom: 15px;">📍 Localização Geográfica</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div>
-                        <p style="margin: 0; font-weight: bold; color: #333; font-size: 0.9em;">Localização:</p>
-                        <p style="margin: 5px 0 0 0; font-size: 1.1em; font-weight: bold;">{{ $caso->localizacao }}</p>
+                        <p style="margin: 0; font-weight: bold; color: #333; font-size: 0.9em;">Província:</p>
+                        <p style="margin: 5px 0 10px 0; font-size: 1.1em; font-weight: bold;">{{ $caso->provincia ?: 'N/A' }}</p>
+                        <p style="margin: 0; font-weight: bold; color: #333; font-size: 0.9em;">Município:</p>
+                        <p style="margin: 5px 0 0 0; font-size: 1.1em; font-weight: bold;">{{ $caso->municipio ?: 'N/A' }}</p>
                     </div>
                     <div>
                         <p style="margin: 0; font-weight: bold; color: #333; font-size: 0.9em;">Coordenadas GPS:</p>

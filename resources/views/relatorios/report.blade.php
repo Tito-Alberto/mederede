@@ -54,7 +54,8 @@
                         <th>Paciente</th>
                         <th>Doenca</th>
                         <th>Status</th>
-                        <th>Localizacao</th>
+                        <th>Provincia</th>
+                        <th>Municipio</th>
                         <th>Data Inicio</th>
                     </tr>
                 </thead>
@@ -65,12 +66,13 @@
                             <td>{{ $isPublic ? $maskName($caso->paciente_nome) : $caso->paciente_nome }}</td>
                             <td>{{ $caso->doenca?->nome ?? 'N/A' }}</td>
                             <td>{{ $caso->status }}</td>
-                            <td>{{ $caso->localizacao }}</td>
+                            <td>{{ $caso->provincia }}</td>
+                            <td>{{ $caso->municipio }}</td>
                             <td>{{ optional($caso->data_inicio)->format('d/m/Y') ?? 'N/A' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="empty">Nenhum registro no periodo.</td>
+                            <td colspan="7" class="empty">Nenhum registro no periodo.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -263,7 +265,8 @@
                         <th>Paciente</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
-                        <th>Localizacao</th>
+                        <th>Provincia</th>
+                        <th>Municipio</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -272,11 +275,12 @@
                             <td>{{ $isPublic ? $maskName($item->paciente_nome) : $item->paciente_nome }}</td>
                             <td>{{ $item->latitude }}</td>
                             <td>{{ $item->longitude }}</td>
-                            <td>{{ $item->localizacao }}</td>
+                            <td>{{ $item->provincia }}</td>
+                            <td>{{ $item->municipio }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="empty">Nenhum registro no periodo.</td>
+                            <td colspan="5" class="empty">Nenhum registro no periodo.</td>
                         </tr>
                     @endforelse
                 </tbody>

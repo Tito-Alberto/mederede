@@ -32,6 +32,26 @@ class Caso extends Model
         'longitude' => 'decimal:8',
     ];
 
+    public function getProvinciaAttribute(): string
+    {
+        $localizacao = trim((string) $this->localizacao);
+        if ($localizacao === '') {
+            return '';
+        }
+        $partes = array_map('trim', explode(',', $localizacao, 2));
+        return $partes[0] ?? '';
+    }
+
+    public function getMunicipioAttribute(): string
+    {
+        $localizacao = trim((string) $this->localizacao);
+        if ($localizacao === '') {
+            return '';
+        }
+        $partes = array_map('trim', explode(',', $localizacao, 2));
+        return $partes[1] ?? '';
+    }
+
     public function doenca(): BelongsTo
     {
         return $this->belongsTo(Doenca::class);

@@ -129,8 +129,12 @@
         <h2>Localizacao</h2>
         <div class="grid">
             <div>
-                <div class="label">Localizacao</div>
-                <div class="value">{{ $caso->localizacao }}</div>
+                <div class="label">Provincia</div>
+                <div class="value">{{ $caso->provincia ?: 'N/A' }}</div>
+            </div>
+            <div>
+                <div class="label">Municipio</div>
+                <div class="value">{{ $caso->municipio ?: 'N/A' }}</div>
             </div>
             <div>
                 <div class="label">Coordenadas</div>

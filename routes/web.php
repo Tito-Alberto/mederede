@@ -152,8 +152,7 @@ Route::middleware(['auth'])->group(function () {
             $inicio = $request->data_inicio ? \Illuminate\Support\Carbon::parse($request->data_inicio)->startOfDay() : $now->copy()->startOfDay();
             $fim = $request->data_fim ? \Illuminate\Support\Carbon::parse($request->data_fim)->endOfDay() : $now->copy()->endOfDay();
             $periodoLabel = 'Personalizado';
-        }
-        if ($periodo === 'diario' && !isset($inicio)) {
+        } elseif ($periodo === 'diario') {
             $inicio = $now->copy()->startOfDay();
             $fim = $now->copy()->endOfDay();
             $periodoLabel = 'Diario';
@@ -274,9 +273,9 @@ Route::middleware(['auth'])->group(function () {
 
             if (in_array('casos', $sections)) {
                 fputcsv($temp, ['Casos Cadastrados']);
-                fputcsv($temp, ['ID', 'Paciente', 'Doenca', 'Status', 'Localizacao', 'Data Inicio']);
+                fputcsv($temp, ['ID', 'Paciente', 'Doenca', 'Status', 'Provincia', 'Municipio', 'Data Inicio']);
                 foreach ($data['casos'] as $caso) {
-                    fputcsv($temp, [$caso->id, $caso->paciente_nome, $caso->doenca?->nome, $caso->status, $caso->localizacao, optional($caso->data_inicio)->format('Y-m-d')]);
+                    fputcsv($temp, [$caso->id, $caso->paciente_nome, $caso->doenca?->nome, $caso->status, $caso->provincia, $caso->municipio, optional($caso->data_inicio)->format('Y-m-d')]);
                 }
                 fputcsv($temp, []);
             }
@@ -330,9 +329,9 @@ Route::middleware(['auth'])->group(function () {
             }
             if (in_array('dados_geograficos', $sections)) {
                 fputcsv($temp, ['Dados Geograficos']);
-                fputcsv($temp, ['Paciente', 'Latitude', 'Longitude', 'Localizacao']);
+                fputcsv($temp, ['Paciente', 'Latitude', 'Longitude', 'Provincia', 'Municipio']);
                 foreach ($data['dadosGeograficos'] as $item) {
-                    fputcsv($temp, [$item->paciente_nome, $item->latitude, $item->longitude, $item->localizacao]);
+                    fputcsv($temp, [$item->paciente_nome, $item->latitude, $item->longitude, $item->provincia, $item->municipio]);
                 }
                 fputcsv($temp, []);
             }

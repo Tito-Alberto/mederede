@@ -37,10 +37,9 @@ class DashboardController extends Controller
             ->pluck('total', 'status');
 
         // Mapa de Calor (Coordenadas)
-        $casosCoordenadas = Caso::where('latitude', '!=', null)
-            ->where('longitude', '!=', null)
-            ->select('paciente_nome', 'latitude', 'longitude', 'status')
-            ->limit(50)
+        $casosCoordenadas = Caso::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->select('paciente_nome', 'latitude', 'longitude', 'status', 'localizacao')
             ->get();
 
         // Preparar dados para Chart.js
@@ -93,6 +92,8 @@ class DashboardController extends Controller
                 'lng' => (float) $caso->longitude,
                 'nome' => $caso->paciente_nome,
                 'status' => $caso->status,
+                'provincia' => $caso->provincia,
+                'municipio' => $caso->municipio,
             ];
         })->values();
         $mapCenter = $mapMarkers->first() ?? ['lat' => -8.839987, 'lng' => 13.289437];

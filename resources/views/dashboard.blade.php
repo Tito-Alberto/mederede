@@ -183,7 +183,8 @@
                 <tr>
                     <th>Paciente</th>
                     <th>Doença</th>
-                    <th>Localização</th>
+                    <th>Província</th>
+                    <th>Município</th>
                     <th>Status</th>
                     <th>Data</th>
                 </tr>
@@ -198,7 +199,8 @@
                     <tr>
                         <td>{{ $nomeExibido }}</td>
                         <td><strong>{{ $caso->doenca?->nome ?? 'N/A' }}</strong></td>
-                        <td>{{ $caso->localizacao }}</td>
+                        <td>{{ $caso->provincia }}</td>
+                        <td>{{ $caso->municipio }}</td>
                         <td>
                             @if($caso->status === 'confirmado')
                                 <span class="badge" style="background: #f8d7da; color: #721c24;">Confirmado</span>
@@ -228,7 +230,7 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
         <div id="mederede-map" style="height: 200px; border-radius: 5px;"></div>
         <div style="margin-top: 0.5rem; color: #666;">
-            {{ $casosCoordenadasCount ?? 0 }} casos com localizacao
+            {{ $casosCoordenadasCount ?? 0 }} casos com coordenadas
         </div>
     </div>
 
@@ -396,19 +398,24 @@
         };
 
         if (hasMarkers) {
+            const bounds = L.latLngBounds();
             mederedeMapMarkers.forEach((marker) => {
                 if (marker && marker.lat && marker.lng) {
                     const color = statusColors[marker.status] || '#667eea';
-                    L.circleMarker([marker.lat, marker.lng], {
+                    const circle = L.circleMarker([marker.lat, marker.lng], {
                         radius: 6,
                         color: '#ffffff',
                         weight: 2,
                         fillColor: color,
                         fillOpacity: 1,
                     }).addTo(map)
-                      .bindPopup(`<strong>${marker.nome || 'Paciente'}</strong><br>Status: ${marker.status || 'N/A'}`);
+                      .bindPopup(`<strong>${marker.nome || 'Paciente'}</strong><br>Status: ${marker.status || 'N/A'}<br>${marker.provincia || ''}${marker.municipio ? ' - ' + marker.municipio : ''}`);
+                    bounds.extend(circle.getLatLng());
                 }
             });
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [20, 20] });
+            }
         }
     }
 </script>
