@@ -67,6 +67,25 @@ class CasoController extends Controller
 
     public function store(Request $request)
     {
+        $normalizeCoord = function ($value) {
+            if ($value === null) {
+                return null;
+            }
+            if (is_string($value)) {
+                $value = trim($value);
+                if ($value === '') {
+                    return null;
+                }
+                return str_replace(',', '.', $value);
+            }
+            return $value;
+        };
+
+        $request->merge([
+            'latitude' => $normalizeCoord($request->input('latitude')),
+            'longitude' => $normalizeCoord($request->input('longitude')),
+        ]);
+
         $validated = $request->validate([
             'paciente_nome' => 'required|string|max:255',
             'doenca_id' => 'required|exists:doencas,id',
@@ -81,7 +100,7 @@ class CasoController extends Controller
             'bilhete' => ['nullable', 'string', Rule::unique('casos', 'bilhete'), Rule::unique('users', 'bilhete')],
             'data_nascimento' => 'nullable|date',
         ], [
-            'bilhete.unique' => 'Bilhete existente.',
+            'bilhete.unique' => 'O bilhete já existe.',
         ]);
 
         $localizacao = trim($validated['localizacao'] ?? '');
@@ -111,7 +130,7 @@ class CasoController extends Controller
         $validated['user_id'] = Auth::id();
         Caso::create($validated);
 
-        return redirect('/casos')->with('success', 'Caso registado com sucesso!');
+        return redirect()->route('casos.create')->with('success', 'Cadastro efectuado com sucesso');
     }
 
     public function show(string $id)
@@ -149,6 +168,25 @@ class CasoController extends Controller
     public function update(Request $request, string $id)
     {
         $caso = Caso::findOrFail($id);
+
+        $normalizeCoord = function ($value) {
+            if ($value === null) {
+                return null;
+            }
+            if (is_string($value)) {
+                $value = trim($value);
+                if ($value === '') {
+                    return null;
+                }
+                return str_replace(',', '.', $value);
+            }
+            return $value;
+        };
+
+        $request->merge([
+            'latitude' => $normalizeCoord($request->input('latitude')),
+            'longitude' => $normalizeCoord($request->input('longitude')),
+        ]);
 
         $validated = $request->validate([
             'paciente_nome' => 'required|string|max:255',

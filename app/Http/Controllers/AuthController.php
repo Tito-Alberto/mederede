@@ -19,7 +19,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             return back()->withErrors([
-                'email' => 'As credenciais fornecidas nÃ£o sÃ£o vÃ¡lidas.',
+                'email' => 'As credenciais fornecidas não são válidas.',
             ])->withInput();
         }
 

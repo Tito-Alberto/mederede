@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 class AdminOnly
 {
     /**
-     * Handle an incoming request.
+     * Processar uma requisição de entrada.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */

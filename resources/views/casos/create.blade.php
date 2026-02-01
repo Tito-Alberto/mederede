@@ -10,6 +10,16 @@
 </div>
 
 <div class="card">
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if ($errors->has('bilhete'))
+        <div class="alert alert-error">
+            {{ $errors->first('bilhete') }}
+        </div>
+    @endif
     <div class="card-header">
         <h2>Preencha os Dados do Caso</h2>
     </div>
@@ -24,7 +34,7 @@
             </div>
 
             <div class="form-group">
-                <label for="bilhete">📋 Bilhete/ID</label>
+                <label for="bilhete">📋 Bilhete</label>
                 <input type="text" id="bilhete" name="bilhete" class="form-control" placeholder="Ex: CC12345678" value="{{ old('bilhete') }}">
             </div>
 
@@ -77,12 +87,12 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="latitude">🧭 Latitude</label>
-                <input type="number" id="latitude" name="latitude" class="form-control" placeholder="Ex: -11.7835" value="{{ old('latitude') }}" step="0.0001" min="-90" max="90">
+                <input type="text" id="latitude" name="latitude" class="form-control" placeholder="Ex: -11.7835" value="{{ old('latitude') }}" inputmode="decimal">
             </div>
 
             <div class="form-group">
                 <label for="longitude">🧭 Longitude</label>
-                <input type="number" id="longitude" name="longitude" class="form-control" placeholder="Ex: 16.3390" value="{{ old('longitude') }}" step="0.0001" min="-180" max="180">
+                <input type="text" id="longitude" name="longitude" class="form-control" placeholder="Ex: 16.3390" value="{{ old('longitude') }}" inputmode="decimal">
             </div>
         </div>
 
@@ -93,6 +103,13 @@
 
         <div class="card map-card">
             <h3>🗺️ Mapa do Caso</h3>
+            <div class="map-actions">
+                <div class="map-search">
+                    <input type="text" id="map-search" class="form-control" placeholder="Pesquisar local...">
+                    <button type="button" id="map-search-btn" class="btn btn-secondary">🔎 Encontrar</button>
+                </div>
+                <button type="button" id="map-locate" class="btn btn-secondary">📍 Minha localização</button>
+            </div>
             <div id="map" class="map-embed"></div>
             <p class="map-help">Clique no mapa para preencher as coordenadas e sugerir a província e o município.</p>
         </div>
@@ -113,6 +130,9 @@
     const municipioInput = document.getElementById('municipio');
     const latInput = document.getElementById('latitude');
     const lonInput = document.getElementById('longitude');
+    const mapSearchInput = document.getElementById('map-search');
+    const mapSearchBtn = document.getElementById('map-search-btn');
+    const mapLocateBtn = document.getElementById('map-locate');
 
     const defaultCenter = [-11.2027, 17.8739];
     const map = L.map('map').setView(defaultCenter, 6);
@@ -128,9 +148,13 @@
     function setMarker(lat, lon, zoom = true) {
         if (!marker) {
             marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+            marker.on('drag', (event) => {
+                const pos = event.target.getLatLng();
+                setInputs(pos.lat, pos.lng);
+            });
             marker.on('dragend', (event) => {
                 const pos = event.target.getLatLng();
-                updateFromLatLng(pos.lat, pos.lng, false);
+                updateFromLatLng(pos.lat, pos.lng, true, true, false);
             });
         } else {
             marker.setLatLng([lat, lon]);
@@ -140,13 +164,27 @@
         }
     }
 
-    function updateFromLatLng(lat, lon, updateInputs = true) {
+    function setInputs(lat, lon) {
+        latInput.value = lat.toFixed(6);
+        lonInput.value = lon.toFixed(6);
+    }
+
+    function applyAddress(address) {
+        if (!address) return;
+        const provincia = address.state || address.region || address.county || '';
+        const municipio = address.city || address.town || address.village || address.municipality || address.county || '';
+        if (provincia) provinciaInput.value = provincia;
+        if (municipio) municipioInput.value = municipio;
+    }
+
+    function updateFromLatLng(lat, lon, updateInputs = true, doReverse = true, zoom = true) {
         if (updateInputs) {
-            latInput.value = lat.toFixed(6);
-            lonInput.value = lon.toFixed(6);
+            setInputs(lat, lon);
         }
-        setMarker(lat, lon);
-        reverseGeocode(lat, lon);
+        setMarker(lat, lon, zoom);
+        if (doReverse) {
+            reverseGeocode(lat, lon);
+        }
     }
 
     function reverseGeocode(lat, lon) {
@@ -158,11 +196,7 @@
                 .then((response) => response.ok ? response.json() : null)
                 .then((data) => {
                     if (!data || !data.address) return;
-                    const address = data.address;
-                    const provincia = address.state || address.region || address.county || '';
-                    const municipio = address.city || address.town || address.village || address.municipality || address.county || '';
-                    if (provincia) provinciaInput.value = provincia;
-                    if (municipio) municipioInput.value = municipio;
+                    applyAddress(data.address);
                 })
                 .catch(() => {});
         }, 300);
@@ -172,9 +206,72 @@
         updateFromLatLng(event.latlng.lat, event.latlng.lng);
     });
 
+    function forwardGeocode(query) {
+        mapSearchBtn.disabled = true;
+        fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`)
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) => {
+                if (!data || data.length === 0) {
+                    alert('Localização não encontrada.');
+                    return;
+                }
+                const result = data[0];
+                const lat = parseFloat(result.lat);
+                const lon = parseFloat(result.lon);
+                updateFromLatLng(lat, lon, true, false);
+                if (result.address) {
+                    applyAddress(result.address);
+                } else {
+                    reverseGeocode(lat, lon);
+                }
+            })
+            .catch(() => {})
+            .finally(() => {
+                mapSearchBtn.disabled = false;
+            });
+    }
+
+    function locateUser() {
+        if (!navigator.geolocation) {
+            alert('Geolocalização não suportada neste navegador.');
+            return;
+        }
+        mapLocateBtn.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                updateFromLatLng(pos.coords.latitude, pos.coords.longitude);
+                mapLocateBtn.disabled = false;
+            },
+            () => {
+                mapLocateBtn.disabled = false;
+                alert('Não foi possível obter a localização.');
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    mapSearchBtn.addEventListener('click', () => {
+        const query = mapSearchInput.value.trim();
+        if (query) forwardGeocode(query);
+    });
+
+    mapSearchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const query = mapSearchInput.value.trim();
+            if (query) forwardGeocode(query);
+        }
+    });
+
+    mapLocateBtn.addEventListener('click', locateUser);
+
     function syncFromInputs() {
-        const lat = parseFloat((latInput.value || '').replace(',', '.'));
-        const lon = parseFloat((lonInput.value || '').replace(',', '.'));
+        const latRaw = (latInput.value || '').replace(/,/g, '.');
+        const lonRaw = (lonInput.value || '').replace(/,/g, '.');
+        if (latRaw !== latInput.value) latInput.value = latRaw;
+        if (lonRaw !== lonInput.value) lonInput.value = lonRaw;
+        const lat = parseFloat(latRaw);
+        const lon = parseFloat(lonRaw);
         if (Number.isFinite(lat) && Number.isFinite(lon)) {
             updateFromLatLng(lat, lon, false);
         }
@@ -208,6 +305,22 @@
     .map-card h3 {
         color: #667eea;
         margin-bottom: 10px;
+    }
+    .map-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .map-search {
+        display: flex;
+        gap: 8px;
+        flex: 1 1 280px;
+    }
+    .map-search input {
+        flex: 1;
+        min-width: 160px;
     }
     .map-embed {
         border: 1px solid #e5e7eb;
